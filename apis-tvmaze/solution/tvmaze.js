@@ -9,6 +9,7 @@ const $episodesArea = $("#episodesArea");
 const $searchForm = $("#searchForm");
 
 
+
 /** Given a search term, search for tv shows that match that query.
  *
  *  Returns (promise) array of show objects: [show, show, ...].
