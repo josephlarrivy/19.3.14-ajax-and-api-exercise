@@ -3,7 +3,7 @@
 const $showsList = $("#shows-list");
 const $episodesArea = $("#episodes-area");
 const $searchForm = $("#search-form");
-
+const $episodesList = $("episodes-list");
 
 /** Given a search term, search for tv shows that match that query.
  *
@@ -12,36 +12,26 @@ const $searchForm = $("#search-form");
  *    (if no image URL given by API, put in a default image URL)
  */
 
- 
-
 async function getShowsByTerm(searchTerm) {
   
   const response = await axios.get(`https://api.tvmaze.com/search/shows?q=${searchTerm}`)
 
-
-
-
-  
-  console.log(response.data[0]);
-
-
   // ADD: Remove placeholder & make request to TVMaze search shows API.
 
-  return [
-    {
-      id: 1767,
-      name: response.data[0].show.name,
-      summary: response.data[0].show.summary,
-      image: response.data[0].show.image.medium
-    }
-  ]
+  return response.data.map(result => {
+    const show = result.show;
+    return {
+      id: show.id,
+      name: show.name,
+      summary: show.summary,
+      image: show.image ? show.image.medium : 'https://tinyurl.com/missing-tv',
+    };
+  });
 }
-
-
-
 
 /** Given list of shows, create markup for each and to DOM */
 
+let i = 0;
 function populateShows(shows) {
   $showsList.empty();
 
@@ -50,19 +40,20 @@ function populateShows(shows) {
         `<div data-show-id="${show.id}" class="Show col-md-12 col-lg-6 mb-4">
          <div class="media">
            <img 
-              src="http://static.tvmaze.com/uploads/images/medium_portrait/160/401704.jpg" 
-              alt="Bletchly Circle San Francisco" 
+              src=${show.image} 
+              alt="Image not available" 
               class="w-25 mr-3">
            <div class="media-body">
              <h5 class="text-primary">${show.name}</h5>
              <div><small>${show.summary}</small></div>
-             <button class="btn btn-outline-light btn-sm Show-getEpisodes">
+             <button class="btn btn-outline-light btn-sm Show-getEpisodes" id='episodesBtn${i}'>
                Episodes
              </button>
            </div>
          </div>  
        </div>
-      `);
+      `
+      );
 
     $showsList.append($show);  }
 }
@@ -92,7 +83,22 @@ $searchForm.on("submit", async function (evt) {
  *      { id, name, season, number }
  */
 
-// async function getEpisodesOfShow(id) { }
+async function getEpisodesOfShow(id) { 
+  const response = await axios.get(`https://api.tvmaze.com/shows/${id}/episodes`);
+  console.log(response);
+}
+
+
+//why doesnt this work?
+const $episodesBtn = $(`#episodesBtn${i}`);
+$episodesBtn.on('click', function(e) {
+  console.log(e);
+})
+
+
+
+
+
 
 /** Write a clear docstring for this function... */
 
