@@ -1,9 +1,10 @@
 "use strict";
 
+
 const $showsList = $("#shows-list");
 const $episodesArea = $("#episodes-area");
 const $searchForm = $("#search-form");
-const $episodesList = $("episodes-list");
+const $episodesList = $("#episodes-list");
 
 /** Given a search term, search for tv shows that match that query.
  *
@@ -46,7 +47,7 @@ function populateShows(shows) {
            <div class="media-body">
              <h5 class="text-primary">${show.name}</h5>
              <div><small>${show.summary}</small></div>
-             <button class="btn btn-outline-light btn-sm Show-getEpisodes" id='episodesBtn${i}'>
+             <button class="btn btn-outline-light btn-sm Show-getEpisodes" id='episodesBtn'>
                Episodes
              </button>
            </div>
@@ -54,8 +55,9 @@ function populateShows(shows) {
        </div>
       `
       );
-
-    $showsList.append($show);  }
+      
+    $showsList.append($show);
+  }
 }
 
 
@@ -71,6 +73,8 @@ async function searchForShowAndDisplay() {
   populateShows(shows);
 }
 
+
+
 $searchForm.on("submit", async function (evt) {
   evt.preventDefault();
   const searchTerm = $('#search-query').val();
@@ -85,21 +89,32 @@ $searchForm.on("submit", async function (evt) {
 
 async function getEpisodesOfShow(id) { 
   const response = await axios.get(`https://api.tvmaze.com/shows/${id}/episodes`);
-  console.log(response);
+
+  return response.data.map(e => ({
+    id: e.id,
+    name: e.name,
+    season: e.season,
+    number: e.number,
+  }));
 }
-
-
-//why doesnt this work?
-const $episodesBtn = $(`#episodesBtn${i}`);
-$episodesBtn.on('click', function(e) {
-  console.log(e);
-})
-
-
-
-
-
 
 /** Write a clear docstring for this function... */
 
-// function populateEpisodes(episodes) { }
+function populateEpisodes(episodes) {
+  $episodesList.empty();
+  for (let i=0; i<episodes.length; i++) {
+    const $eachEpisode = (
+      `<li> ${episodes[i].name} (season: ${episodes[i].season}. episode: ${episodes[i].number}) </li>`
+    );
+    $episodesList.append($eachEpisode);
+  }
+  $episodesArea.show();
+}
+
+async function getEpisodesAndDisplay(evt) {
+  const showId = $(evt.target).closest(".Show").data("show-id");
+  const episodes = await getEpisodesOfShow(showId);
+  populateEpisodes(episodes);
+}
+
+$showsList.on("click", ".Show-getEpisodes", getEpisodesAndDisplay);
